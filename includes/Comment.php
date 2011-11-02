@@ -57,16 +57,6 @@ class Comment{
 	
 	/**
 	 * 
-	 * Establece la dirección IP desde la que se creó el comentario.
-	 * @param String $newIp Dirección IP que se quiere asignar al comentario.
-	 */
-	public function setIpAddress($newIp)
-	{
-		$this->ipAddress = $newIp;
-	}
-	
-	/**
-	 * 
 	 * Obtiene la dirección IP desde la que se creó el comentario.
 	 */
 	public function getIpAddress()
@@ -123,12 +113,15 @@ class Comment{
 	 */
 	private function initialize($articleId)
 	{
+		global $wgUser;
+		
 		$this->id = 0;
 		$this->date = getdate();
 		$this->articleId = $articleId;
-		//$this->userId = $userId;
-		//$this->userName = $userName;
-		//$this->userRealName = $userRealName;
+		$this->userId = $wgUser->getId();
+		$this->userName = $wgUser->getName();
+		$this->userRealName = $wgUser->getRealName();
+		$this->ipAddress = $_SERVER['REMOTE_ADDR'];
 	}
 	
 	static private function getSingleComment($id){
@@ -143,6 +136,10 @@ class Comment{
 	
 	public function hasChildComments(){
 		return count($this->childComments) > 0;
+	}
+	
+	public function save(){
+		
 	}
 	
 	static public function getApproved($articleId){
@@ -185,6 +182,8 @@ class Comment{
 		return $commentsToReturn;
 		
 	}
+	
+	
 	
 	static public function getNotApproved(){
 		return null;

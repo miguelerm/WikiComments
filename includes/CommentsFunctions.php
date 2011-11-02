@@ -13,30 +13,36 @@ class CommentsFunctions{
 	
 		if (!$wgUser->isLoggedIn()) return '<div class="formularioComentarios" style="color:#ff0000"><p>debe estar autenticado para colocar un mensaje</p></div>';
 		
-		$actionUrl = SpecialPage::getTitleFor( 'NuevoComentario' )->getLocalURL();
+		$actionUrl = SpecialPage::getTitleFor( 'NewComment' )->getLocalURL();
 		
+		$username = $wgUser->getRealName();
 		
+		if(strlen($username) == 0)
+			$username = $wgUser->getName();
+		
+		$content  = '';
 		$content .= '<div class="formularioComentarios">';
-		$content .=    '<form action="' . $actionUrl . '">';
+		$content .=    '<form action="' . $actionUrl . '" method="POST">';
 		$content .=       '<fieldset>';
 		$content .=          '<legend>Comparta comentario</legend>';
 		$content .=          '<ul>';
 		$content .=             '<li>';
 		$content .=                '<label for="usr_nombre">Nombre:</label>';
-		$content .=                '<input type="text" name="usr_nombre" id="usr_nombre" value="' . mysql_real_escape_string($wgUser->getName()) . '" disabled="disabled" />';
+		$content .=                '<input type="text" name="usr_nombre" id="usr_nombre" value="' . mysql_real_escape_string($username) . '" disabled="disabled" />';
 		$content .=             '</li>';
 		$content .=             '<li>';
-		$content .=                '<input type="hidden" name="pageTitle" value="' . $wgTitle . '" />';
-		$content .=                '<label for="texto_comentario">Comentario:</label>';
-		$content .=                '<textarea rows="5" cols="20" name="comentario" id="comentario"></textarea>';
+		$content .=                '<input type="hidden" name="articleId" value="' . $wgTitle->getArticleID() . '" />';
+		$content .=                '<input type="hidden" name="parentId" value="0" />';
+		$content .=                '<label for="text">Comentario:</label>';
+		$content .=                '<textarea rows="5" cols="20" name="text" id="text"></textarea>';
 		$content .=             '</li>';
 		$content .=          '</ul>';
 		$content .=       '</fieldset>';
-		$content .=       '<input type="submit" value="Comentar" />';
+		$content .=       '<input type="submit" value="Agregar comentario" />';
 		$content .=    '</form>';
 		$content .= '</div>';
 		
-		return $content;
+		return array( $content, 'noparse' => true, 'isHTML' => true );
 		
 	}
 
