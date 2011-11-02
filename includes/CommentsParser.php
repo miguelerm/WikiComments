@@ -7,7 +7,7 @@ class CommentsParser{
 		
 		$commentsFunction = new CommentsFunctions();
 		$wgParser->setFunctionHook('commentsform', array( &$commentsFunction, 'renderForm' ));
-		$wgParser->setFunctionHook('commentslist', array( &$commentsFunction, 'renderList' ));
+		$wgParser->setFunctionHook('commentslist', 'Comment::renderList');
 		
 		return true;
 		

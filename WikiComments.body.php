@@ -12,4 +12,6 @@ $wgAutoloadClasses['CommentsDB'      ] = $dir . 'includes/CommentsDB.php';
 $wgHooks['ParserFirstCallInit'][] = 'CommentsParser::FirstCallInit';
 $wgHooks['LanguageGetMagic'][]    = 'CommentsLanguage::GetMagic';
 
+//CheckDatabase verifica si las tablas requeridas se encuentran en la base
+//de datos, de lo contrario las crea.
 CommentsDB::CheckDatabase();

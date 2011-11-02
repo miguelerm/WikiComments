@@ -32,4 +32,3 @@ $wgExtensionCredits['parserhook'][] = array(
 );
 
 require_once 'WikiComments.body.php';
-
