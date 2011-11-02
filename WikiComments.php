@@ -1,7 +1,7 @@
 <?php
 /*
- * Comentarios - Extension que permite que un usuario autenticado, coloque un 
- * comentario en algun artículo que tenga la funcion {{#commentsform:}}.
+ * WikiComments - Extension que permite que un usuario autenticado, coloque un 
+ * comentario en algun artículo utilizando la función la funcion {{#commentsform:}}.
  * 
  * y permite visualizar la lista de comentarios si el artículo tiene la funcion
  * {{#commentslist:}}

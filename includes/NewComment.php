@@ -1,4 +1,10 @@
 <?php
+/**
+ * 
+ * Pagina especial que captura la solicitud para agregar un nuevo comentario a un artículo.
+ * @author miguelerm
+ *
+ */
 class NewComment extends SpecialPage
 {
 	
@@ -7,10 +13,10 @@ class NewComment extends SpecialPage
 	}
 	
 	/**
-	* Punto de inicio de la página actual. En este caso procesará la solicitud de agregar un nuevo comentario.
-	*
-	* @param $par parámetros trasladados a la página.
-	*/
+	 * 
+	 * Punto de inicio de la página actual. En este caso procesará la solicitud de agregar un nuevo comentario.
+	 * @param $par parámetros trasladados a la página.
+	 */
 	public function execute( $par ) {
 		global $wgOut, $wgRequest, $wgUser;
 		

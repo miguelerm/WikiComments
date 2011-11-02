@@ -1,6 +1,17 @@
 <?php
+/**
+ * 
+ * Clase que encapsula la lógica que se le agregará al parser de MediaWiki.
+ * @author miguelerm
+ *
+ */
 class CommentsParser{
 	
+	/**
+	 * 
+	 * Registra las funciones que deben ejecutarse al encontrar las palabras reservadas por la extension WikiComments.
+	 * @return boolean
+	 */
 	static function FirstCallInit(){
 		
 		global $wgParser;

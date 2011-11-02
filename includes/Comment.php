@@ -25,6 +25,7 @@ class Comment{
 	/**
 	 * 
 	 * Obtiene el identificador único del comentario.
+	 * @return int
 	 */
 	public function getId(){
 		return $this->id;	
@@ -42,6 +43,7 @@ class Comment{
 	/**
 	 * 
 	 * Obtiene el valor del texto que conforma el cuerpo del comentario.
+	 * @return text
 	 */
 	public function getText(){ 
 		return $this->text; 
@@ -49,7 +51,8 @@ class Comment{
 	
 	/**
 	 * 
-	 * Obtiene la fecha en que se creó el comentario. 
+	 * Obtiene la fecha en que se creó el comentario.
+	 * @return int 
 	 */
 	public function getDate(){
 		return $this->date;
@@ -58,6 +61,7 @@ class Comment{
 	/**
 	 * 
 	 * Obtiene la dirección IP desde la que se creó el comentario.
+	 * @return text
 	 */
 	public function getIpAddress()
 	{
@@ -76,11 +80,17 @@ class Comment{
 	/**
 	 * 
 	 * Obtiene el comentario del cual es respuesta el comentario actual.
+	 * @return int
 	 */
 	public function getParentCommentId(){
 		return $this->parentCommentId;
 	}
 	
+	/**
+	 * 
+	 * Obtiene el nombre del usuario que creó el comentario.
+	 * @return text
+	 */
 	public function getUserRealName(){
 		if( strlen($this->userRealName) == 0)
 			return $this->userName;
@@ -91,6 +101,7 @@ class Comment{
 	/**
 	 * 
 	 * Obtiene los comentarios que estan marcados como respuesta del comentario actual.
+	 * @return array
 	 */
 	public function getChildComments(){
 		return $this->childComments;
@@ -137,14 +148,29 @@ class Comment{
 	
 	/* Métodos públicos */
 	
+	/**
+	 * 
+	 * Agrega un nuevo comentario como respuesta del comentario instanciado.
+	 * @param Comment $comment Comentario que se quiere agregar como respuesta.
+	 */
 	public function addChildComment(Comment $comment){
 		$this->childComments[] = $comment;
 	}
 	
+	/**
+	 * 
+	 * Indica si un comentario tiene respuestas o no.
+	 * @return boolean Retorna true si el comentario tiene respuestas o false en caso contrario.
+	 */
 	public function hasChildComments(){
 		return count($this->childComments) > 0;
 	}
 	
+	/**
+	 * 
+	 * Persiste la información del comentario en la base de datos.
+	 * @return NULL
+	 */
 	public function save(){
 		
 		global $wgDBprefix;
@@ -172,6 +198,11 @@ class Comment{
 		
 	}
 	
+	/**
+	 * 
+	 * Obtiene los comentarios que han sido aprobados para un artículo en particular.
+	 * @param int $articleId
+	 */
 	static public function getApproved($articleId){
 		
 		global $wgDBprefix;
@@ -212,8 +243,6 @@ class Comment{
 		return $commentsToReturn;
 		
 	}
-	
-	
 	
 	static public function getNotApproved(){
 		return null;

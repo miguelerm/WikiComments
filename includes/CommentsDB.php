@@ -1,8 +1,19 @@
 <?php
+/**
+ * 
+ * Clase CommentsDB: contiene rutinas de apoyo para el acceso a los datos de la extensión WikiComments.
+ * @author miguelerm
+ *
+ */
 class CommentsDB{
 	
 	static private $dbchecked = false;
 	
+	/**
+	 * 
+	 * Verifica que existan las tablas requeridas en la base de datos, de lo contrario las crea.
+	 * @return NULL
+	 */
 	static function CheckDatabase(){
 		
 		if(self::$dbchecked) return null;

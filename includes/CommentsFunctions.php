@@ -1,6 +1,18 @@
 <?php
+/**
+ * 
+ * Clase CommentsFunctions: contiene funciones de apoyo para el renderizado de la UI de la extensión WikiComments
+ * @author miguelerm
+ *
+ */
 class CommentsFunctions{
 
+	/**
+	 * 
+	 * Renderiza el formulario html para agregar un nuevo comentario
+	 * @param Parser $parser
+	 * @return string|multitype:boolean string
+	 */
 	function renderForm(&$parser){
 		
 		global $wgUser;
@@ -46,6 +58,11 @@ class CommentsFunctions{
 		
 	}
 
+	/**
+	 * 
+	 * Renderiza el listado de comentarios que se han colocado en un artículo.
+	 * @param Parser $parser
+	 */
 	public function renderList(&$parser){
 	
 		global $wgTitle;
@@ -72,6 +89,11 @@ class CommentsFunctions{
 		
 	}
 	
+	/**
+	 * 
+	 * Obtiene el html necesario para mostrar un comentario y sus respuestas.
+	 * @param Comment $comment
+	 */
 	private function getCommentHtml(Comment $comment){
 		$content = '';
 		$content .= '<li>';
