@@ -22,6 +22,7 @@ class CommentsDB{
 			$sql .=    "`creation_date` datetime NOT NULL default '0000-00-00 00:00:00',";
 			$sql .=    "`parent_id` int(11) NOT NULL default '0',";
 			$sql .=    "`user_ip` varchar(45) NOT NULL default '',";
+			$sql .=    "`status` TINYINT(1) NOT NULL default 0,";
 			$sql .=    "PRIMARY KEY  (`id`),";
 			$sql .=    "KEY `wikicomment_article_id_index` (`article_id`),";
 			$sql .=    "KEY `wikicomment_user_id_index` (`user_id`)";

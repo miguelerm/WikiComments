@@ -15,6 +15,28 @@ $messages['es'] = array(
 
 	/* Descripción que se muestra en los creditos de la extensión */
 	'comentarios-desc'   => 'permite que un usuario autenticado, coloque un comentario en un art&iacute;culo',
+
+	/* Mensaje que se muestra al inicio de la lista de comentarios */
+
+	'commentlist-message' => 'Comentarios',
+
+	/* Formato de fecha */
+	'commentlist-dateformat' => 'd/m/Y',
+	
+	/* Lista de comentarios vacía */
+	'commentlist-empty' => 'No existe ning&uacute;n comentario para este art&iacute;culo.',
+	
+	/* Mensaje del formulario de nuevo comentario */
+	'commentform-message' => 'Comparta su comentario',
+	
+	/* Etiqueta para el nombre del usuario */
+	'username-label' => 'Nombre',
+	
+	/* Etiqueta para el texto del mensaje */
+	'message-label' => 'Comentario',
+	
+	/* Texto para el boton 'Agregar comentario' del formulario de nuevo comentario */
+	'addcomment-button' => 'Agregar comentario',
 	
 	/* Título de la página que agrega un nuevo comentario */
 	'newcomment-title'   => 'Comentario Agregado',

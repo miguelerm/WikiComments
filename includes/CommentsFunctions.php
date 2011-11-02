@@ -22,23 +22,23 @@ class CommentsFunctions{
 		
 		$content  = '';
 		$content .= '<div class="formularioComentarios">';
+		$content .=    '<h2>' . wfMsg('commentform-message') . '</h2>';
 		$content .=    '<form action="' . $actionUrl . '" method="POST">';
 		$content .=       '<fieldset>';
-		$content .=          '<legend>Comparta comentario</legend>';
 		$content .=          '<ul>';
 		$content .=             '<li>';
-		$content .=                '<label for="usr_nombre">Nombre:</label>';
+		$content .=                '<label for="usr_nombre">' . wfMsg('username-label') . ':</label>';
 		$content .=                '<input type="text" name="usr_nombre" id="usr_nombre" value="' . mysql_real_escape_string($username) . '" disabled="disabled" />';
 		$content .=             '</li>';
 		$content .=             '<li>';
 		$content .=                '<input type="hidden" name="articleId" value="' . $wgTitle->getArticleID() . '" />';
 		$content .=                '<input type="hidden" name="parentId" value="0" />';
-		$content .=                '<label for="text">Comentario:</label>';
+		$content .=                '<label for="text">' . wfMsg('message-label') . ':</label>';
 		$content .=                '<textarea rows="5" cols="20" name="text" id="text"></textarea>';
 		$content .=             '</li>';
 		$content .=          '</ul>';
 		$content .=       '</fieldset>';
-		$content .=       '<input type="submit" value="Agregar comentario" />';
+		$content .=       '<input type="submit" value="' . wfMsg('addcomment-button') . '" />';
 		$content .=    '</form>';
 		$content .= '</div>';
 		
@@ -56,16 +56,16 @@ class CommentsFunctions{
 		$content .= '<div class="listaComentarios">';
 		
 		if(count($comments) > 0){
-			
+			$content .= '<h2>' . wfMsg('commentlist-message') . '</h2>';
 			$content .= '<ul>';
 			foreach ($comments as $comment)
 			{
-				$content .= Comment::getCommentHtml($comment);
+				$content .= $this->getCommentHtml($comment);
 			}
 			$content .= '</ul>';
 		}
 		else{
-			$content .= '<span>No existe ning&uacute;n comentario para este art&iacute;culo.</span>';
+			$content .= '<span>' . wfMsg('commentlist-empty') . '</span>';
 		}
 		
 		return $content;
@@ -75,7 +75,7 @@ class CommentsFunctions{
 	private function getCommentHtml(Comment $comment){
 		$content = '';
 		$content .= '<li>';
-		$content .= '<strong>' . $comment->getUserRealName() . '</strong> <em>' . date(DATE_RFC822, $comment->getDate()) . '</em>: <span>' . $comment->getText() . '</span>';
+		$content .= '<strong>' . $comment->getUserRealName() . '</strong> <em>' . date(wfMsg('commentlist-dateformat'), $comment->getDate()) . '</em>: <span>' . $comment->getText() . '</span>';
 		
 		if ($comment->hasChildComments()) {
 			$content .= '<ul>';
@@ -87,6 +87,7 @@ class CommentsFunctions{
 		}
 		
 		$content .= '</li>';
+		return $content;
 	}
 	
 

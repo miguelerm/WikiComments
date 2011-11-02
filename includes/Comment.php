@@ -81,6 +81,13 @@ class Comment{
 		return $this->parentCommentId;
 	}
 	
+	public function getUserRealName(){
+		if( strlen($this->userRealName) == 0)
+			return $this->userName;
+		else
+			return $this->userRealName;
+	}
+	
 	/**
 	 * 
 	 * Obtiene los comentarios que estan marcados como respuesta del comentario actual.
@@ -116,7 +123,7 @@ class Comment{
 		global $wgUser;
 		
 		$this->id = 0;
-		$this->date = getdate();
+		$this->date = time();
 		$this->articleId = $articleId;
 		$this->userId = $wgUser->getId();
 		$this->userName = $wgUser->getName();
@@ -140,6 +147,29 @@ class Comment{
 	
 	public function save(){
 		
+		global $wgDBprefix;
+		
+		$database = wfGetDB( DB_MASTER );
+		
+		$database->insert(
+					"${wgDBprefix}WikiComments",
+					array(
+						'article_id' => $this->articleId,
+						'user_id' => $this->userId,
+						'text' => $this->text,
+						'creation_date' => date( 'Y-m-d H:i:s' , $this->date),
+						'parent_id' => $this->parentCommentId,
+						'user_ip' => $this->ipAddress,
+						'status' => 0
+						),
+						__METHOD__
+					);
+		
+		$commentId = $database->insertId();
+		$database->commit();
+		
+		$this->id = $commentId;
+		
 	}
 	
 	static public function getApproved($articleId){
@@ -147,8 +177,8 @@ class Comment{
 		global $wgDBprefix;
 		
 		$tables = array( "${wgDBprefix}WikiComments", "${wgDBprefix}user" );
-		$fields = array( 'id', 'article_id', "`${wgDBprefix}user`.`user_id`", 'text', 'UNIX_TIMESTAMP(creation_date) AS timestamp', 'parent_id', 'user_ip', 'user_name', 'user_real_name' );
-		$conds = array('article_id' => $articleId);
+		$fields = array( 'id', 'article_id', "`${wgDBprefix}user`.`user_id`", 'text', 'UNIX_TIMESTAMP(creation_date) AS creation_date', 'parent_id', 'user_ip', 'user_name', 'user_real_name' );
+		$conds = array('article_id' => $articleId, 'status' => 1);
 		$join_conds = array('WikiComments' => array('INNER JOIN', "`${wgDBprefix}user`.`user_id` = `${wgDBprefix}WikiComments`.`user_id`"));
 		$options['ORDER BY'] = 'parent_id ASC, creation_date DESC';
 		
@@ -162,7 +192,7 @@ class Comment{
 		foreach ($result as $row)
 		{
 			$commentId = $row->id;
-			$comment = new Comment($articleId, $userId);
+			$comment = new Comment($row->article_id, $row->user_id);
 			$comment->id = $commentId;
 			$comment->text = $row->text;
 			$comment->date = $row->creation_date;
