@@ -149,15 +149,15 @@ class Comment{
 		
 		global $wgDBprefix;
 		
-		$tables = array( $wgDBprefix . "WikiComments", $wgDBprefix . "User" );
-		$fields = array( 'id', 'article_id', '`User`.`user_id`', 'text', 'UNIX_TIMESTAMP(creation_date) AS timestamp', 'parent_id', 'user_ip', 'user_name', 'user_real_name' );
+		$tables = array( "${wgDBprefix}WikiComments", "${wgDBprefix}user" );
+		$fields = array( 'id', 'article_id', "`${wgDBprefix}user`.`user_id`", 'text', 'UNIX_TIMESTAMP(creation_date) AS timestamp', 'parent_id', 'user_ip', 'user_name', 'user_real_name' );
 		$conds = array('article_id' => $articleId);
-		$join_conds = array('WikiComments' => array('INNER JOIN', '`User`.`user_id` = `WikiComments`.`user_id`'));
+		$join_conds = array('WikiComments' => array('INNER JOIN', "`${wgDBprefix}user`.`user_id` = `${wgDBprefix}WikiComments`.`user_id`"));
 		$options['ORDER BY'] = 'parent_id ASC, creation_date DESC';
 		
-		$database =& wfGetDB( DB_SLAVE );
+		$database = wfGetDB( DB_SLAVE );
 		
-		$result = $dbr->select( $tables, $fields, $conds, __METHOD__, $options, $joinConds );
+		$result = $database->select( $tables, $fields, $conds, __METHOD__, $options, $join_conds );
 		
 		$comments = array();
 		$commentsToReturn = array();
@@ -190,47 +190,5 @@ class Comment{
 		return null;
 	}
 	
-	static public function renderList(&$parser){
-	
-		global $wgTitle;
-		
-		$comments = Comment::getApproved($wgTitle->getArticleID());
-		
-		$content  = '';
-		$content .= '<div class="listaComentarios">';
-		
-		if(count($comments) > 0){
-			
-			$content .= '<ul>';
-			foreach ($comments as $comment)
-			{
-				$content .= Comment::getCommentHtml($comment);
-			}
-			$content .= '</ul>';
-		}
-		else{
-			$content .= '<span>No existe ning&uacute;n comentario para este art&iacute;culo.</span>';
-		}
-		
-		return $content;
-		
-	}
-	
-	static private function getCommentHtml(Comment $comment){
-		$content = '';
-		$content .= '<li>';
-		$content .= '<strong>' . $comment->getUserRealName() . '</strong> <em>' . date(DATE_RFC822, $comment->getDate()) . '</em>: <span>' . $comment->getText() . '</span>';
-		
-		if ($comment->hasChildComments()) {
-			$content .= '<ul>';
-			
-			foreach ($comment->getChildComments() as $childComment)
-				$content .= Comment::getCommentHtml($childComment);
-			
-			$content .= '</ul>';
-		}
-		
-		$content .= '</li>';
-	}
-	
+
 }

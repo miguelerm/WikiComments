@@ -40,19 +40,48 @@ class CommentsFunctions{
 		
 	}
 
-	function renderList(&$parser){
+	public function renderList(&$parser){
+	
+		global $wgTitle;
 		
+		$comments = Comment::getApproved($wgTitle->getArticleID());
+		
+		$content  = '';
 		$content .= '<div class="listaComentarios">';
-		$content .= '<h3>Comentarios:</h3>';
-		$content .=    '<div class="comentario">';
-		$content .=       '<strong>Fulanito</strong> dijo el ' . date(DATE_RFC822) . ': <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin aliquet lacus, id malesuada enim.</span>';
-		$content .=    '</div>';
-		$content .=    '<div class="comentario">';
-		$content .=       '<strong>Fulanito 2</strong> dijo el ' . date(DATE_RFC822) . ': <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin aliquet lacus, id malesuada enim.</span>';
-		$content .=    '</div>';
-		$content .= '</div>';
+		
+		if(count($comments) > 0){
+			
+			$content .= '<ul>';
+			foreach ($comments as $comment)
+			{
+				$content .= Comment::getCommentHtml($comment);
+			}
+			$content .= '</ul>';
+		}
+		else{
+			$content .= '<span>No existe ning&uacute;n comentario para este art&iacute;culo.</span>';
+		}
 		
 		return $content;
+		
 	}
+	
+	private function getCommentHtml(Comment $comment){
+		$content = '';
+		$content .= '<li>';
+		$content .= '<strong>' . $comment->getUserRealName() . '</strong> <em>' . date(DATE_RFC822, $comment->getDate()) . '</em>: <span>' . $comment->getText() . '</span>';
+		
+		if ($comment->hasChildComments()) {
+			$content .= '<ul>';
+			
+			foreach ($comment->getChildComments() as $childComment)
+				$content .= Comment::getCommentHtml($childComment);
+			
+			$content .= '</ul>';
+		}
+		
+		$content .= '</li>';
+	}
+	
 
 }

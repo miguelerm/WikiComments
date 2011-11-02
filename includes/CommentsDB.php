@@ -9,7 +9,7 @@ class CommentsDB{
 		
 		global $wgDBprefix;
 		
-		$dbr =& wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_SLAVE );
 		
 		// Check if 'WikiComments' database tables exists
 		if (!$dbr->tableExists('WikiComments'))
