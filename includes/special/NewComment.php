@@ -8,8 +8,12 @@
 class NewComment extends SpecialPage
 {
 	
+	/**
+	 * 
+	 * Constructor por defecto de la página Newcomment
+	 */
 	function __construct(){
-		parent::__construct("NewComment");
+		parent::__construct('NewComment', 'user');
 	}
 	
 	/**
@@ -27,7 +31,7 @@ class NewComment extends SpecialPage
 		
 		$content = '';
 		
-		if( $articleId ) {
+		if( $articleId && strlen($text) > 0) {
 			
 			$article = Article::newFromId($articleId);
 			
@@ -41,23 +45,29 @@ class NewComment extends SpecialPage
 				$title = $article->getTitle();
 				
 				$content .= wfMsg( 'newcomment-Message', $text, $title );
-				
+								
 			}else{
+				$content .= wfMsg('invalid-article');
 				$error = true;
 			}
 			
 		}else{
+			$content .= wfMsg('invalid-args');
 			$error = true;
 		}
 		
 		if ($error){
-			$content .= wfMsg( 'newcomment-error');
+			$content .= "\n" . wfMsg( 'newcomment-error');
+			$pagetitle = Title::makeTitle( NS_SPECIAL, wfMsg( 'newcomment-errortitle' ) );
+		} else {
+			$pagetitle = Title::makeTitle( NS_SPECIAL, wfMsg( 'newcomment-title' ) );
 		}
 
-		$pagetitle = Title::makeTitle( NS_SPECIAL, wfMsg( 'newcomment-title' ) );
+		
 		
 		$wgOut->setTitle( $pagetitle);
 		$wgOut->addWikiText($content);
 		
 	}
+	
 }

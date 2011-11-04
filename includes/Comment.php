@@ -19,6 +19,8 @@ class Comment{
 	private $parentCommentId;
 	private $ipAddress;
 	private $childComments;
+	private $status;
+	private $articleName;
 	
 	/* Propiedades públicas */
 	
@@ -67,6 +69,11 @@ class Comment{
 	{
 		return $this->ipAddress;
 	}
+	
+	public function getArticleName(){
+		return $this->articleName;
+	}
+	
 	
 	/**
 	 * 
@@ -142,8 +149,42 @@ class Comment{
 		$this->ipAddress = $_SERVER['REMOTE_ADDR'];
 	}
 	
-	static private function getSingleComment($id){
-		return null;
+	static private function getCommentsFromDB($conds, $options){
+		
+		global $wgDBprefix;
+		global $wgShowSQLErrors;
+		
+		
+		$tables = array( "${wgDBprefix}WikiComments", "${wgDBprefix}user", "${wgDBprefix}page"  );
+		$fields = array( 'id', 'article_id', "`${wgDBprefix}user`.`user_id`", 'text', 'UNIX_TIMESTAMP(creation_date) AS creation_date', 'parent_id', 'user_ip', 'user_name', 'user_real_name', 'status', "`${wgDBprefix}page`.`page_title`" );
+		$join_conds = array('user' => array('INNER JOIN', "`${wgDBprefix}user`.`user_id` = `${wgDBprefix}WikiComments`.`user_id`"),
+		                    'page' => array('INNER JOIN', "`${wgDBprefix}page`.`page_id` = `${wgDBprefix}WikiComments`.`article_id`"));
+		
+		$database = wfGetDB( DB_SLAVE );
+		
+		$wgShowSQLErrors = true;
+		
+		$result = $database->select( $tables, $fields, $conds, __METHOD__, $options, $join_conds );
+		
+		$comments = array();
+		
+		foreach ($result as $row)
+		{
+			$commentId = $row->id;
+			$comment = new Comment($row->article_id, $row->user_id);
+			$comment->id = $commentId;
+			$comment->text = $row->text;
+			$comment->date = $row->creation_date;
+			$comment->parentCommentId = $row->parent_id;
+			$comment->userName = $row->user_name;
+			$comment->userRealName = $row->user_real_name;
+			$comment->ipAddress = $row->user_ip;
+			$comment->articleName = $row->page_title;
+			$comments[$commentId] = $comment;
+		}
+		
+		return $comments;
+		
 	}
 	
 	/* Métodos públicos */
@@ -205,35 +246,14 @@ class Comment{
 	 */
 	static public function getApproved($articleId){
 		
-		global $wgDBprefix;
 		
-		$tables = array( "${wgDBprefix}WikiComments", "${wgDBprefix}user" );
-		$fields = array( 'id', 'article_id', "`${wgDBprefix}user`.`user_id`", 'text', 'UNIX_TIMESTAMP(creation_date) AS creation_date', 'parent_id', 'user_ip', 'user_name', 'user_real_name' );
 		$conds = array('article_id' => $articleId, 'status' => 1);
-		$join_conds = array('WikiComments' => array('INNER JOIN', "`${wgDBprefix}user`.`user_id` = `${wgDBprefix}WikiComments`.`user_id`"));
-		$options['ORDER BY'] = 'parent_id ASC, creation_date DESC';
+		$options['ORDER BY'] = 'parent_id ASC, creation_date ASC';
 		
-		$database = wfGetDB( DB_SLAVE );
+		$comments = self::getCommentsFromDB($conds, $options);
 		
-		$result = $database->select( $tables, $fields, $conds, __METHOD__, $options, $join_conds );
-		
-		$comments = array();
 		$commentsToReturn = array();
-		
-		foreach ($result as $row)
-		{
-			$commentId = $row->id;
-			$comment = new Comment($row->article_id, $row->user_id);
-			$comment->id = $commentId;
-			$comment->text = $row->text;
-			$comment->date = $row->creation_date;
-			$comment->parentCommentId = $row->parent_id;
-			$comment->userName = $row->user_name;
-			$comment->userRealName = $row->user_real_name;
-			$comment->ipAddress = $row->user_ip;
-			$comments[$commentId] = $comment;			
-		}
-		
+					
 		foreach ($comments as $currentComment)
 			if ($currentComment->parentCommentId != 0 && $comments[$currentComment->parentCommentId] != null)
 				$comments[$currentComment->parentCommentId]->addChildComment($currentComment);
@@ -244,9 +264,26 @@ class Comment{
 		
 	}
 	
-	static public function getNotApproved(){
-		return null;
+	static public function getNotApproved($page){
+		
+		$conds = array('status' => 0);
+		$options['ORDER BY'] = 'article_id ASC, creation_date ASC';
+		
+		$comments = self::getCommentsFromDB($conds, $options);
+		
+		return $comments;
+		
 	}
 	
+	static public function getAll($page){
+		
+		$conds = array();
+		$options['ORDER BY'] = 'creation_date ASC, article_id ASC';
+		
+		$comments = self::getCommentsFromDB($conds, $options);
+		
+		return $comments;
+		
+	}
 
 }
