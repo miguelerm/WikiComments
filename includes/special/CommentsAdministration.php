@@ -21,12 +21,9 @@ class CommentsAdministration extends SpecialPage {
 			$wgOut->addWikiText('==No tiene privilegios para administrar los comentarios==');
 			return;
 		}
-	
 		
-		$currentTitle = $this->getTitle();
 		$action = $wgRequest->getText('action');
 		$page = $wgRequest->getInt('page');
-		$comments = array();
 		
 		$page = $page ? $page : 1 ;
 		$action = strlen($action) > 0 ? $action : 'pending' ;
@@ -34,95 +31,95 @@ class CommentsAdministration extends SpecialPage {
 		switch ($action) {
 			
 			case 'listall':
-			$comments = Comment::getAll($page);
+			$this->renderCommentsList(Comment::getAll($page));
 			break;
 			
-			case 'delete':{
-				$commentId = $wgRequest->getInt('commentid');
-				
-				if ($commentId){
-					
-					$wgOut->addWikiText('Comentario ' .  $commentId);
-					
-					$comment = Comment::getSingle($commentId);
-					
-					if ($comment != null){
-						$wgOut->addWikiText('Comentario no nulo: ' .  $comment->getText());
-						$comment->delete();
-					}
-						
-				}
-				
-				$wgOut->redirect( $currentTitle->getLocalURL() );
-			}
+			case 'delete':
+			$this->deleteComment($wgRequest->getInt('commentid'));
 			break;
 			
-			case 'approve':{
-				
-				$commentId = $wgRequest->getInt('commentid');
-
-				if ($commentId){
-
-					$wgOut->addWikiText('Comentario ' .  $commentId);
-						
-					$comment = Comment::getSingle($commentId);
-					
-					if ($comment !=null){
-						$wgOut->addWikiText('Comentario no nulo: ' .  $comment->getText());
-						$comment->approve();
-					}
-				}
-				
-				$wgOut->redirect( $currentTitle->getLocalURL() );
-			}
+			case 'approve':
+			$this->approveComment($wgRequest->getInt('commentid'));
+			
 			break;
 			
 			default:
-			$comments = Comment::getNotApproved($page);
+			$this->renderCommentsList(Comment::getNotApproved($page));
 			break;
 		}
 		
-		if (count($comments)) {
+	}
+	
+	private function approveComment($commentId){
+		
+		if ($commentId) 
+			$comment = Comment::getSingle($commentId);
+		
+		if ($comment != null) 
+			$comment->approve();
+		
+		$wgOut->redirect( $this->getTitle()->getLocalURL() );
+		
+	}
+	
+	private function deleteComment($commentId){
+	
+		if ($commentId)
+			$comment = Comment::getSingle($commentId);
+	
+		if ($comment != null)
+			$comment->delete();
+		
+		$wgOut->redirect( $this->getTitle()->getLocalURL() );
 			
+	}
+	
+	private function renderCommentsList($comments){
+		global $wgOut;
+		
+		if (count($comments)) {
+				
 			$wgOut->addHTML('<ul>');
 			
+			$currentTitle = $this->getTitle();
+				
 			/* @var $comment Comment */
 			foreach ($comments as $comment) {
-				
+		
 				$wgOut->addHTML('<li>');
 				$wgOut->addHTML(   '<div class="comentario">');
 				$wgOut->addWikiText(   "El usuario '''" . $comment->getUserRealName() . "''' comento en el articulo [[" . $comment->getArticleName() . "]] el dia ''" . date(wfMsg('commentlist-dateformat'), $comment->getDate())  . "'' lo siguiente:\n");
-				
+		
 				$html = htmlspecialchars( $comment->getText() );
 				$html = str_replace( array("\r\n", "\n", "\r"), "<br />", $html);
-				
+		
 				$wgOut->addHTML( $html );
-				
+		
 				if ($comment->getParentCommentId() > 0)
-					$wgOut->addHTML(       '<p><a href="#" title="En respuesta de...">En respuesta de...</a></p>');
-
+				$wgOut->addHTML(       '<p><a href="#" title="En respuesta de...">En respuesta de...</a></p>');
+		
 				$approveUrl = $currentTitle->getLocalURL('action=approve&commentid=' . $comment->getId());
 				$deleteUrl = $currentTitle->getLocalURL('action=delete&commentid=' . $comment->getId());
-				
+		
 				$wgOut->addHTML(   '</div>');
 				$wgOut->addHTML(   '<div class="operaciones">');
 				$wgOut->addHTML(       '<a href="' . $approveUrl . '" onClick="return confirm(\'&iquest;Seguro que desea aprobar el comentario del usuario ' . $comment->getUserRealName() . '?\')" title="Aprobar">Aprobar</a> ');
 				$wgOut->addHTML(       '<a href="' . $deleteUrl . '" onClick="return confirm(\'&iquest;Seguro que desea eliminar el comentario del usuario ' . $comment->getUserRealName() . '?\')" title="Eliminar">Eliminar</a>');
 				$wgOut->addHTML(   '</div>');
 				$wgOut->addHTML('</li>');
-				
+		
 			};
-			
-			$wgOut->addHTML('</ul>');
 				
-			
+			$wgOut->addHTML('</ul>');
+		
+				
 		} else {
 			$wgOut->addWikiText('No hay ningun mensaje para mostrar...');
 		}
 		
 		$pagetitle = Title::makeTitle( NS_SPECIAL, wfMsg( 'comments-title' ) );
 		$wgOut->setTitle( $pagetitle);
-			
+		
 	}
 	
 }
