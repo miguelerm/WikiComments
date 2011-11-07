@@ -15,15 +15,14 @@ class CommentsFunctions{
 	 */
 	function renderForm(&$parser){
 		
-		global $wgUser;
-		global $wgTitle;
+		global $wgUser, $wgTitle;
 		
 		// Desabilitando el cache, de lo contrario los
 		// comentarios se actualizarian solamente cuando
 		// un usuario modifique un artículo.
 		$parser->disableCache();
 	
-		if (!$wgUser->isLoggedIn()) return '<div class="formularioComentarios" style="color:#ff0000"><p>debe estar autenticado para colocar un mensaje</p></div>';
+		if (!$wgUser->isLoggedIn()) return array('<div class="formularioComentarios" style="color:#ff0000"><span>debe estar autenticado para colocar un mensaje</span></div>', 'noparse' => true, 'isHTML' => true );;
 		
 		$actionUrl = SpecialPage::getTitleFor( 'NewComment' )->getLocalURL();
 		
@@ -42,6 +41,11 @@ class CommentsFunctions{
 		$content .=                '<label for="usr_nombre">' . wfMsg('username-label') . ':</label>';
 		$content .=                '<input type="text" name="usr_nombre" id="usr_nombre" value="' . mysql_real_escape_string($username) . '" disabled="disabled" />';
 		$content .=             '</li>';
+		$content .=             '<li style="display:none" id="reply">';
+		$content .=                '<label for="replytext">En respuesta de:</label>';
+		$content .=                '<textarea rows="5" cols="20" name="replytext" id="replytext" disabled="disabled"></textarea>';;
+		$content .=                '<a href="#" title="Cancelar" onclick="return cancelarRespuesta()">Cancelar</a>';;
+		$content .=             '</li>';
 		$content .=             '<li>';
 		$content .=                '<input type="hidden" name="articleId" value="' . $wgTitle->getArticleID() . '" />';
 		$content .=                '<input type="hidden" name="parentId" value="0" />';
@@ -54,6 +58,16 @@ class CommentsFunctions{
 		$content .=    '</form>';
 		$content .= '</div>';
 		
+		$content .= '<script type="text/javascript">';
+		$content .= 'function cancelarRespuesta(){';
+		$content .=    '$(\'.formularioComentarios\').children().find(\'[name=parentId]\').val(0);';
+		$content .=    '$(\'#reply\').hide();';
+		$content .=    '$(\'#replytext\').val("");';
+		$content .=    '$(\'#text\').focus();';
+		$content .=    'return false;';
+		$content .= '}';
+		$content .= '</script>';
+		
 		return array( $content, 'noparse' => true, 'isHTML' => true );
 		
 	}
@@ -65,7 +79,9 @@ class CommentsFunctions{
 	 */
 	public function renderList(&$parser){
 	
-		global $wgTitle;
+		global $wgTitle, $wgScriptPath, $wgOut;
+		
+		$wgOut->addScript("<script type=\"text/javascript\" src=\"" . $wgScriptPath . "/extensions/jQuery/jquery-1.7.min.js\"></script>\n");
 		
 		$comments = Comment::getApproved($wgTitle->getArticleID());
 		
@@ -77,7 +93,7 @@ class CommentsFunctions{
 			$content .= '<ul>';
 			foreach ($comments as $comment)
 			{
-				$content .= $this->getCommentHtml($comment);
+				$content .= $this->getCommentHtml($comment, $parser);
 			}
 			$content .= '</ul>';
 		}
@@ -85,7 +101,19 @@ class CommentsFunctions{
 			$content .= '<span>' . wfMsg('commentlist-empty') . '</span>';
 		}
 		
-		return $content;
+		$content .= '</div>';
+		
+		$content .= '<script type="text/javascript">';
+		$content .= 'function responder(id){';
+		$content .=    '$(\'.formularioComentarios\').children().find(\'[name=parentId]\').val(id);';
+		$content .=    '$(\'#reply\').show();';
+		$content .=    '$(\'#replytext\').val($(\'#comment\' + id + \'text\').text());';
+		$content .=    '$(\'#text\').focus();';
+		$content .=    'return false;';
+		$content .= '}';
+		$content .= '</script>';
+		
+		return array( $content, 'noparse' => true, 'isHTML' => true );
 		
 	}
 	
@@ -94,21 +122,35 @@ class CommentsFunctions{
 	 * Obtiene el html necesario para mostrar un comentario y sus respuestas.
 	 * @param Comment $comment
 	 */
-	private function getCommentHtml(Comment $comment){
+	private function getCommentHtml(Comment $comment, $parser){
+		
+		global $wgUser;
+		
 		$content = '';
 		$content .= '<li>';
-		$content .= '<strong>' . $comment->getUserRealName() . '</strong> <em>' . date(wfMsg('commentlist-dateformat'), $comment->getDate()) . '</em>: <span>' . $comment->getText() . '</span>';
+		$content .=    '<div class="comentario">';
+		$content .=       '<strong>' . $comment->getUserRealName() . '</strong> <em>' . date(wfMsg('commentlist-dateformat'), $comment->getDate()) . '</em>: <span id="comment' . $comment->getId() . 'text">' . $parser->recursiveTagParse( $comment->getText() ) . '</span>';
+		$content .=    '</div>';
+		
+		if ($wgUser->isLoggedIn()){
+			$content .=    '<div class="acciones">';
+			$content .=       '<a href="#" onclick="return responder(' . $comment->getId() . ')" title="Responder">Responder</a>';
+			$content .=    '</div>';
+		}
 		
 		if ($comment->hasChildComments()) {
-			$content .= '<ul>';
+			$content .= '<div class="subcomentarios">';
+			$content .=    '<ul>';
 			
 			foreach ($comment->getChildComments() as $childComment)
-				$content .= Comment::getCommentHtml($childComment);
+				$content .= $this->getCommentHtml($childComment, $parser);
 			
-			$content .= '</ul>';
+			$content .=    '</ul>';
+			$content .= '</div>';
 		}
 		
 		$content .= '</li>';
+		
 		return $content;
 	}
 	

@@ -241,6 +241,28 @@ class Comment{
 	
 	/**
 	 * 
+	 * Elimina la información del comentario de la base de datos.
+	 */
+	public function delete(){
+		global $wgDBprefix;
+		
+		$database = wfGetDB( DB_MASTER );
+		$database->delete("${wgDBprefix}WikiComments", array('id' => $this->id), __METHOD__ );
+		$database->commit();
+		
+	}
+	
+	public function approve(){
+		global $wgDBprefix;
+		
+		$database = wfGetDB( DB_MASTER );
+		$database->update("${wgDBprefix}WikiComments", array('status' => 1), array('id' => $this->id), __METHOD__ );
+		$database->commit();
+		
+	}
+	
+	/**
+	 * 
 	 * Obtiene los comentarios que han sido aprobados para un artículo en particular.
 	 * @param int $articleId
 	 */
@@ -283,6 +305,26 @@ class Comment{
 		$comments = self::getCommentsFromDB($conds, $options);
 		
 		return $comments;
+		
+	}
+
+	/**
+	 * 
+	 * Obtiene un único comentario desde la base de datos. 
+	 * @param int $commentId Identificador unico del comentario que se quiere obtener.
+	 * @return Comment Retorna el comentario encontrado
+	 */
+	static public function getSingle($commentId){
+		
+		$conds = array('id' => $commentId);
+		
+		$comments = self::getCommentsFromDB($conds, null);
+		
+		if($comments != null && count($comments) > 0)
+			foreach ($comments as $comment)
+				return $comment;
+		else
+			return null;
 		
 	}
 

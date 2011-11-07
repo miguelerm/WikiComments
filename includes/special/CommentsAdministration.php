@@ -22,6 +22,8 @@ class CommentsAdministration extends SpecialPage {
 			return;
 		}
 	
+		
+		$currentTitle = $this->getTitle();
 		$action = $wgRequest->getText('action');
 		$page = $wgRequest->getInt('page');
 		$comments = array();
@@ -30,8 +32,49 @@ class CommentsAdministration extends SpecialPage {
 		$action = strlen($action) > 0 ? $action : 'pending' ;
 		
 		switch ($action) {
+			
 			case 'listall':
 			$comments = Comment::getAll($page);
+			break;
+			
+			case 'delete':{
+				$commentId = $wgRequest->getInt('commentid');
+				
+				if ($commentId){
+					
+					$wgOut->addWikiText('Comentario ' .  $commentId);
+					
+					$comment = Comment::getSingle($commentId);
+					
+					if ($comment != null){
+						$wgOut->addWikiText('Comentario no nulo: ' .  $comment->getText());
+						$comment->delete();
+					}
+						
+				}
+				
+				$wgOut->redirect( $currentTitle->getLocalURL() );
+			}
+			break;
+			
+			case 'approve':{
+				
+				$commentId = $wgRequest->getInt('commentid');
+
+				if ($commentId){
+
+					$wgOut->addWikiText('Comentario ' .  $commentId);
+						
+					$comment = Comment::getSingle($commentId);
+					
+					if ($comment !=null){
+						$wgOut->addWikiText('Comentario no nulo: ' .  $comment->getText());
+						$comment->approve();
+					}
+				}
+				
+				$wgOut->redirect( $currentTitle->getLocalURL() );
+			}
 			break;
 			
 			default:
@@ -52,11 +95,14 @@ class CommentsAdministration extends SpecialPage {
 				
 				if ($comment->getParentCommentId() > 0)
 					$wgOut->addHTML(       '<p><a href="#" title="En respuesta de...">En respuesta de...</a></p>');
-								
+
+				$approveUrl = $currentTitle->getLocalURL('action=approve&commentid=' . $comment->getId());
+				$deleteUrl = $currentTitle->getLocalURL('action=delete&commentid=' . $comment->getId());
+				
 				$wgOut->addHTML(   '</div>');
 				$wgOut->addHTML(   '<div class="operaciones">');
-				$wgOut->addHTML(       '<a href="#" title="Aprobar">Aprobar</a> ');
-				$wgOut->addHTML(       '<a href="#" title="Eliminar">Eliminar</a>');
+				$wgOut->addHTML(       '<a href="' . $approveUrl . '" onClick="return confirm(\'&iquest;Seguro que desea aprobar el comentario del usuario ' . $comment->getUserRealName() . '?\')" title="Aprobar">Aprobar</a> ');
+				$wgOut->addHTML(       '<a href="' . $deleteUrl . '" onClick="return confirm(\'&iquest;Seguro que desea eliminar el comentario del usuario ' . $comment->getUserRealName() . '?\')" title="Eliminar">Eliminar</a>');
 				$wgOut->addHTML(   '</div>');
 				$wgOut->addHTML('</li>');
 				
