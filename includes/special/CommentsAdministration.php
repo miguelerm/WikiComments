@@ -50,6 +50,11 @@ class CommentsAdministration extends SpecialPage {
 		
 	}
 	
+	/**
+	 * 
+	 * Aprueba un comentario, cambiando su estado de 0 a 1.
+	 * @param int $commentId Identificador único del comentario.
+	 */
 	private function approveComment($commentId){
 		
 		if ($commentId) 
@@ -62,6 +67,11 @@ class CommentsAdministration extends SpecialPage {
 		
 	}
 	
+	/**
+	 * 
+	 * Elimina un comentario.
+	 * @param int $commentId Identificador único del comentario.
+	 */
 	private function deleteComment($commentId){
 	
 		if ($commentId)
@@ -74,6 +84,11 @@ class CommentsAdministration extends SpecialPage {
 			
 	}
 	
+	/**
+	 * 
+	 * Renderiza la lista de comentarios como una lista HTML.
+	 * @param array $comments Arreglo que contiene los comentarios que se desea mostrar.
+	 */
 	private function renderCommentsList($comments){
 		global $wgOut;
 		
@@ -95,9 +110,12 @@ class CommentsAdministration extends SpecialPage {
 		
 				$wgOut->addHTML( $html );
 		
+				//Si el comentario es una respuesta de otro comentario,
+				//se debe genera un link hacia el comentario original.
 				if ($comment->getParentCommentId() > 0)
-				$wgOut->addHTML(       '<p><a href="#" title="En respuesta de...">En respuesta de...</a></p>');
+					$wgOut->addHTML(       '<p><a href="#" title="En respuesta de...">En respuesta de...</a></p>');
 		
+				//Se obtienen las urls para aprobar y para eliminar el comentario.
 				$approveUrl = $currentTitle->getLocalURL('action=approve&commentid=' . $comment->getId());
 				$deleteUrl = $currentTitle->getLocalURL('action=delete&commentid=' . $comment->getId());
 		

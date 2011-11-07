@@ -149,14 +149,24 @@ class Comment{
 		$this->ipAddress = $_SERVER['REMOTE_ADDR'];
 	}
 	
+	/**
+	 * 
+	 * Ejecuta una consulta a la tabla WikiComments, con las condiciones y opciones indicadas.
+	 * @param array $conds Condiciones que filtrarán los resultados que provienen de la base de datos.
+	 * @param array $options Opciones de ordenamiento de resultados.
+	 */
 	static private function getCommentsFromDB($conds, $options){
 		
 		global $wgDBprefix;
 		global $wgShowSQLErrors;
 		
-		
+		//Se seleccionan las tablas WikiComments, user, page, para su posterior interseccion.
 		$tables = array( "${wgDBprefix}WikiComments", "${wgDBprefix}user", "${wgDBprefix}page"  );
+		
+		//Se indican los campos que interesa obtener.
 		$fields = array( 'id', 'article_id', "`${wgDBprefix}user`.`user_id`", 'text', 'UNIX_TIMESTAMP(creation_date) AS creation_date', 'parent_id', 'user_ip', 'user_name', 'user_real_name', 'status', "`${wgDBprefix}page`.`page_title`" );
+		
+		//Se definen las reglas de la intersección entre las tablas seleccionadas.
 		$join_conds = array('user' => array('INNER JOIN', "`${wgDBprefix}user`.`user_id` = `${wgDBprefix}WikiComments`.`user_id`"),
 		                    'page' => array('INNER JOIN', "`${wgDBprefix}page`.`page_id` = `${wgDBprefix}WikiComments`.`article_id`"));
 		
@@ -252,6 +262,10 @@ class Comment{
 		
 	}
 	
+	/**
+	 * 
+	 * Marca el comentario como aprobado (cambiando su estado de 0 a 1).
+	 */
 	public function approve(){
 		global $wgDBprefix;
 		
@@ -286,6 +300,11 @@ class Comment{
 		
 	}
 	
+	/**
+	 * 
+	 * Obtiene los comentarios que no han sido aprobados por el administrador (estado = 0).
+	 * @param int $page Número de la página que se quiere obtener.
+	 */
 	static public function getNotApproved($page){
 		
 		$conds = array('status' => 0);
@@ -297,6 +316,12 @@ class Comment{
 		
 	}
 	
+	/**
+	 * 
+	 * Obtiene todos los comentarios de todas los artículos, ordenados por fecha de forma ascendente.
+	 * @param int $page Número de la página que se quiere obtener.
+	 * @return array:Comment Retorna los comentarios encontrados.
+	 */
 	static public function getAll($page){
 		
 		$conds = array();
