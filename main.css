@@ -1,0 +1,28 @@
+/* WikiComments extension */
+.formularioComentarios{
+	float:left;
+	width:40%;
+}
+
+.listaComentarios{
+	float:right;
+	width:60%;
+}
+.listaComentarios > ul > li, .subcomentarios > ul > li{
+	list-style: none;
+	background-color: #ffffff;
+}
+.subcomentarios > ul{
+	margin-top: 0;
+	margin-left: 10px;
+}
+.acciones{
+	text-align: right;
+	border-bottom: solid 1px #c0c0c0;
+}
+.comentario span[id]{
+	display:block;
+}
+.subcomentarios{
+	background-color: #e0e0e0;
+}

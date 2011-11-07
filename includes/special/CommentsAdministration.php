@@ -91,7 +91,12 @@ class CommentsAdministration extends SpecialPage {
 				
 				$wgOut->addHTML('<li>');
 				$wgOut->addHTML(   '<div class="comentario">');
-				$wgOut->addWikiText(   "El usuario '''" . $comment->getUserRealName() . "''' comento en el articulo [[" . $comment->getArticleName() . "]] el dia ''" . date(wfMsg('commentlist-dateformat'), $comment->getDate())  . "'' lo siguiente:\n" . $comment->getText());
+				$wgOut->addWikiText(   "El usuario '''" . $comment->getUserRealName() . "''' comento en el articulo [[" . $comment->getArticleName() . "]] el dia ''" . date(wfMsg('commentlist-dateformat'), $comment->getDate())  . "'' lo siguiente:\n");
+				
+				$html = htmlspecialchars( $comment->getText() );
+				$html = str_replace( array("\r\n", "\n", "\r"), "<br />", $html);
+				
+				$wgOut->addHTML( $html );
 				
 				if ($comment->getParentCommentId() > 0)
 					$wgOut->addHTML(       '<p><a href="#" title="En respuesta de...">En respuesta de...</a></p>');

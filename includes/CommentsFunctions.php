@@ -22,7 +22,7 @@ class CommentsFunctions{
 		// un usuario modifique un artículo.
 		$parser->disableCache();
 	
-		if (!$wgUser->isLoggedIn()) return array('<div class="formularioComentarios" style="color:#ff0000"><span>debe estar autenticado para colocar un mensaje</span></div>', 'noparse' => true, 'isHTML' => true );;
+		if (!$wgUser->isLoggedIn()) return array('<div class="formularioComentarios"><h2>' . wfMsg('commentform-message') . '</h2><span class="error">debe estar autenticado para colocar un mensaje</span></div>', 'noparse' => true, 'isHTML' => true );;
 		
 		$actionUrl = SpecialPage::getTitleFor( 'NewComment' )->getLocalURL();
 		
@@ -86,6 +86,7 @@ class CommentsFunctions{
 		$comments = Comment::getApproved($wgTitle->getArticleID());
 		
 		$content  = '';
+		$content .= '<link rel="stylesheet" type="text/css" href="'.$wgScriptPath.'/extensions/WikiComments/main.css" media="screen" />';
 		$content .= '<div class="listaComentarios">';
 		
 		if(count($comments) > 0){
@@ -102,6 +103,7 @@ class CommentsFunctions{
 		}
 		
 		$content .= '</div>';
+		
 		
 		$content .= '<script type="text/javascript">';
 		$content .= 'function responder(id){';
@@ -129,7 +131,7 @@ class CommentsFunctions{
 		$content = '';
 		$content .= '<li>';
 		$content .=    '<div class="comentario">';
-		$content .=       '<strong>' . $comment->getUserRealName() . '</strong> <em>' . date(wfMsg('commentlist-dateformat'), $comment->getDate()) . '</em>: <span id="comment' . $comment->getId() . 'text">' . $parser->recursiveTagParse( $comment->getText() ) . '</span>';
+		$content .=       '<strong>' . $comment->getUserRealName() . '</strong> <em>' . date(wfMsg('commentlist-dateformat'), $comment->getDate()) . '</em>: <span id="comment' . $comment->getId() . 'text">' . str_replace( array("\r\n", "\n", "\r"), "<br />", htmlspecialchars ( $comment->getText() )) . '</span>';
 		$content .=    '</div>';
 		
 		if ($wgUser->isLoggedIn()){
