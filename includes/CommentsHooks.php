@@ -8,37 +8,73 @@
 class CommentsHooks{
 
 
+	/**
+	 *
+	 * Método que será ejecutado por MediaWiki antes de renderizar el
+	 * html para agregar los comentarios de los artículos.
+	 * @param OutputPage $op Pagina a la que se agrega el wikitext.
+	 * @param string $text el texto HTML que será agregado.
+	 */
 	public static function OutputPageBeforeHTML( &$op, &$text ){
 
-		global $wgUser, $wgTitle;
-
-		if (!$wgUser->isLoggedIn()){
-			$text .= '<div class="formularioComentarios"><h2>' . wfMsg('commentform-message') . '</h2><span class="error">debe estar autenticado para colocar un mensaje</span></div>';
-			return true;
-		}
-
-		$text .= self::renderForm();
+		$articleTitle = $op->getTitle();
+		
+		if (!$articleTitle->exists()) return true;
+		
+		if(!self::showWikiComments()) return true;
+		
+		$text .= self::renderForm($articleTitle->getArticleID());
 		$text .= self::renderList();
 
 		return true;
 
 	}
+	
+	/**
+	 * 
+	 * Indica si se pueden mostrar los WikiComments en algún artículo o no.
+	 */
+	private static function showWikiComments(){
+		
+		//Validaciones extraidas de la extension Commentbox:
+		//http://svn.wikimedia.org/viewvc/mediawiki/trunk/extensions/Commentbox/Commentbox.php?view=markup
+		
+		global $wgRequest;
+		
+		$action = $wgRequest->getVal( 'action', 'view' );
+		
+		if ( $action != 'view' && $action != 'purge' && $action != 'submit' ) return false;
+		
+		if (  $wgRequest->getCheck( 'wpPreview' ) ) return false;
+		
+		if ( $wgRequest->getCheck( 'wpLivePreview' ) ) return false;
+		
+		if ( $wgRequest->getCheck( 'wpDiff' ) ) return false;
+		
+		if ( !is_null( $wgRequest->getVal( 'preview' ) ) ) return false;
+		
+		if ( !is_null( $wgRequest->getVal( 'diff' ) ) ) return false;
+		
+		return true;
+		
+	}
 
 
 	/**
 	 *
-	 * Renderiza el formulario html para agregar un nuevo comentario
+	 * Renderiza el formulario html para agregar un nuevo comentario.
+	 * @param int $articleId Identificador único del artículo.
 	 * @return string html del formulario
 	 */
-	private static function renderForm(){
+	private static function renderForm( $articleId ){
 
-		global $wgUser, $wgTitle;
+		global $wgUser;
 
-		if (!$wgUser->isLoggedIn()) return array('<div class="formularioComentarios"><h2>' . wfMsg('commentform-message') . '</h2><span class="error">debe estar autenticado para colocar un mensaje</span></div>', 'noparse' => true, 'isHTML' => true );;
+		if (!$wgUser->isLoggedIn()) return '<div class="formularioComentarios"><h2>' . wfMsg('commentform-message') . '</h2><span class="error">debe estar autenticado para colocar un mensaje</span></div>';
 
 		$sp = new NewComment();
 		$actionUrl = $sp->getTitle()->getLocalURL();
-					
+			
 		$username = $wgUser->getRealName();
 
 		if(strlen($username) == 0)
@@ -60,7 +96,7 @@ class CommentsHooks{
 		$content .=                '<a href="#" title="Cancelar" onclick="return cancelarRespuesta()">Cancelar</a>';;
 		$content .=             '</li>';
 		$content .=             '<li>';
-		$content .=                '<input type="hidden" name="articleId" value="' . $wgTitle->getArticleID() . '" />';
+		$content .=                '<input type="hidden" name="articleId" value="' . $articleId  . '" />';
 		$content .=                '<input type="hidden" name="parentId" value="0" />';
 		$content .=                '<label for="text">' . wfMsg('message-label') . ':</label>';
 		$content .=                '<textarea rows="5" cols="20" name="text" id="text"></textarea>';

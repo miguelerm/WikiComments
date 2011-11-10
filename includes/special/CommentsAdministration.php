@@ -15,6 +15,7 @@ class CommentsAdministration extends SpecialPage {
 	* @param $par parámetros trasladados a la página.
 	*/
 	public function execute( $par ) {
+		
 		global $wgOut, $wgRequest, $wgUser;
 		
 		if (!$wgUser->isAllowed( 'commentadmin' )){
@@ -57,6 +58,8 @@ class CommentsAdministration extends SpecialPage {
 	 */
 	private function approveComment($commentId){
 		
+		global $wgOut;
+		
 		if ($commentId) 
 			$comment = Comment::getSingle($commentId);
 		
@@ -74,6 +77,8 @@ class CommentsAdministration extends SpecialPage {
 	 */
 	private function deleteComment($commentId){
 	
+		global $wgOut;
+		
 		if ($commentId)
 			$comment = Comment::getSingle($commentId);
 	
@@ -90,6 +95,7 @@ class CommentsAdministration extends SpecialPage {
 	 * @param array $comments Arreglo que contiene los comentarios que se desea mostrar.
 	 */
 	private function renderCommentsList($comments){
+		
 		global $wgOut;
 		
 		if (count($comments)) {
