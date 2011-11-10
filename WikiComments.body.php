@@ -7,6 +7,7 @@ $wgExtensionMessagesFiles['WikiComments'] = $dir . 'WikiComments.i18n.php';
 
 /* Cargando las clases que se utilizaran por la extensión */
 $wgAutoloadClasses['Comment'                ] = $dir . 'includes/Comment.php';
+$wgAutoloadClasses['CommentsHooks'          ] = $dir . 'includes/CommentsHooks.php';
 $wgAutoloadClasses['CommentsFunctions'      ] = $dir . 'includes/CommentsFunctions.php';
 $wgAutoloadClasses['CommentsParser'         ] = $dir . 'includes/CommentsParser.php';
 $wgAutoloadClasses['CommentsLanguage'       ] = $dir . 'includes/CommentsLanguage.php';
@@ -15,8 +16,7 @@ $wgAutoloadClasses['NewComment'             ] = $dir . 'includes/special/NewComm
 $wgAutoloadClasses['CommentsAdministration' ] = $dir . 'includes/special/CommentsAdministration.php';
 
 /* Registrando los nuevos Hooks al sistema */
-$wgHooks['ParserFirstCallInit'][] = 'CommentsParser::FirstCallInit';
-$wgHooks['LanguageGetMagic'   ][] = 'CommentsLanguage::GetMagic';
+$wgHooks['OutputPageBeforeHTML'][] = 'CommentsHooks::OutputPageBeforeHTML';
 
 /* Registrando las nuevas paginas especiales */
 $wgSpecialPages['NewComment'              ] = 'NewComment';

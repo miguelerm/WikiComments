@@ -1,36 +1,49 @@
 <?php
 /**
- * 
- * Clase CommentsFunctions: contiene funciones de apoyo para el renderizado de la UI de la extensión WikiComments
- * @author miguelerm
+ *
+ * Clase que encapsula toda la lógica agregada a los eventos de renderizado de páginas de MediaWiki
+ * @author miguel.erm
  *
  */
-class CommentsFunctions{
+class CommentsHooks{
+
+
+	public static function OutputPageBeforeHTML( &$op, &$text ){
+
+		global $wgUser, $wgTitle;
+
+		if (!$wgUser->isLoggedIn()){
+			$text .= '<div class="formularioComentarios"><h2>' . wfMsg('commentform-message') . '</h2><span class="error">debe estar autenticado para colocar un mensaje</span></div>';
+			return true;
+		}
+
+		$text .= self::renderForm();
+		$text .= self::renderList();
+
+		return true;
+
+	}
+
 
 	/**
-	 * 
+	 *
 	 * Renderiza el formulario html para agregar un nuevo comentario
-	 * @param Parser $parser
-	 * @return string|multitype:boolean string
+	 * @return string html del formulario
 	 */
-	function renderForm(&$parser){
-		
+	private static function renderForm(){
+
 		global $wgUser, $wgTitle;
-		
-		// Desabilitando el cache, de lo contrario los
-		// comentarios se actualizarian solamente cuando
-		// un usuario modifique un artículo.
-		$parser->disableCache();
-	
+
 		if (!$wgUser->isLoggedIn()) return array('<div class="formularioComentarios"><h2>' . wfMsg('commentform-message') . '</h2><span class="error">debe estar autenticado para colocar un mensaje</span></div>', 'noparse' => true, 'isHTML' => true );;
-		
-		$actionUrl = SpecialPage::getTitleFor( 'NewComment' )->getLocalURL();
-		
+
+		$sp = new NewComment();
+		$actionUrl = $sp->getTitle()->getLocalURL();
+					
 		$username = $wgUser->getRealName();
-		
+
 		if(strlen($username) == 0)
-			$username = $wgUser->getName();
-		
+		$username = $wgUser->getName();
+
 		$content  = '';
 		$content .= '<div class="formularioComentarios">';
 		$content .=    '<h2>' . wfMsg('commentform-message') . '</h2>';
@@ -57,7 +70,7 @@ class CommentsFunctions{
 		$content .=       '<input type="submit" value="' . wfMsg('addcomment-button') . '" />';
 		$content .=    '</form>';
 		$content .= '</div>';
-		
+
 		$content .= '<script type="text/javascript">';
 		$content .= 'function cancelarRespuesta(){';
 		$content .=    '$(\'.formularioComentarios\').children().find(\'[name=parentId]\').val(0);';
@@ -67,44 +80,44 @@ class CommentsFunctions{
 		$content .=    'return false;';
 		$content .= '}';
 		$content .= '</script>';
-		
-		return array( $content, 'noparse' => true, 'isHTML' => true );
-		
+			
+		return $content;
+
 	}
 
 	/**
-	 * 
+	 *
 	 * Renderiza el listado de comentarios que se han colocado en un artículo.
-	 * @param Parser $parser
+	 * @return string html necesario para renderizar la lista de comentarios.
 	 */
-	public function renderList(&$parser){
-	
+	private static function renderList(){
+
 		global $wgTitle, $wgScriptPath, $wgOut;
-		
+
 		$wgOut->addScript("<script type=\"text/javascript\" src=\"" . $wgScriptPath . "/extensions/jQuery/jquery-1.7.min.js\"></script>\n");
-		
+
 		$comments = Comment::getApproved($wgTitle->getArticleID());
-		
+
 		$content  = '';
 		$content .= '<link rel="stylesheet" type="text/css" href="'.$wgScriptPath.'/extensions/WikiComments/main.css" media="screen" />';
 		$content .= '<div class="listaComentarios">';
-		
+
 		if(count($comments) > 0){
 			$content .= '<h2>' . wfMsg('commentlist-message') . '</h2>';
 			$content .= '<ul>';
 			foreach ($comments as $comment)
 			{
-				$content .= $this->getCommentHtml($comment, $parser);
+				$content .= self::getCommentHtml($comment);
 			}
 			$content .= '</ul>';
 		}
 		else{
 			$content .= '<span>' . wfMsg('commentlist-empty') . '</span>';
 		}
-		
+
 		$content .= '</div>';
-		
-		
+
+
 		$content .= '<script type="text/javascript">';
 		$content .= 'function responder(id){';
 		$content .=    '$(\'.formularioComentarios\').children().find(\'[name=parentId]\').val(id);';
@@ -114,47 +127,47 @@ class CommentsFunctions{
 		$content .=    'return false;';
 		$content .= '}';
 		$content .= '</script>';
-		
-		return array( $content, 'noparse' => true, 'isHTML' => true );
-		
+
+		return $content;
+
 	}
-	
+
 	/**
-	 * 
-	 * Obtiene el html necesario para mostrar un comentario y sus respuestas.
-	 * @param Comment $comment
-	 */
-	private function getCommentHtml(Comment $comment, $parser){
-		
+		*
+		* Obtiene el html necesario para mostrar un comentario y sus respuestas.
+		* @param Comment $comment
+		*/
+	private static function getCommentHtml(Comment $comment){
+
 		global $wgUser;
-		
+
 		$content = '';
 		$content .= '<li>';
 		$content .=    '<div class="comentario">';
 		$content .=       '<strong>' . $comment->getUserRealName() . '</strong> <em>' . date(wfMsg('commentlist-dateformat'), $comment->getDate()) . '</em>: <span id="comment' . $comment->getId() . 'text">' . str_replace( array("\r\n", "\n", "\r"), "<br />", htmlspecialchars ( $comment->getText() )) . '</span>';
 		$content .=    '</div>';
-		
+
 		if ($wgUser->isLoggedIn()){
 			$content .=    '<div class="acciones">';
 			$content .=       '<a href="#" onclick="return responder(' . $comment->getId() . ')" title="Responder">Responder</a>';
 			$content .=    '</div>';
 		}
-		
+			
 		if ($comment->hasChildComments()) {
 			$content .= '<div class="subcomentarios">';
 			$content .=    '<ul>';
-			
+
 			foreach ($comment->getChildComments() as $childComment)
-				$content .= $this->getCommentHtml($childComment, $parser);
-			
+			$content .= self::getCommentHtml($childComment, $parser);
+
 			$content .=    '</ul>';
 			$content .= '</div>';
 		}
-		
+
 		$content .= '</li>';
-		
+
 		return $content;
 	}
-	
+
 
 }
