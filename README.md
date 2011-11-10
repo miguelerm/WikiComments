@@ -6,11 +6,12 @@ Una extension mas que permite agregar comentarios a un aticulo wiki.
 
 Caracteristicas
 ---------------
-
+    
 - Los comentarios se persisten en la base de datos en una tabla exclusiva para 
-  ellos. 
-  > A diferencia de la extension [CommentBox][1] que persiste los comentarios 
-    como contenido del articulo.
+  ellos.
+
+    > A diferencia de la extension [CommentBox][1] que persiste los comentarios 
+      como contenido del articulo.
   
 - Los comentarios deben ser aprobados por algun usuario que se encuentre en el 
   rol "commentadmin" para que sean visibles en la pagina del articulo.
@@ -43,7 +44,7 @@ instalado MediaWiki:
 
     require_once('$IP/extensions/WikiComments/WikiComments.php')
 
-> $IP es la carpeta raiz en donde está instalado MediaWiki.
+> $IP es la carpeta raiz en donde esta instalado MediaWiki.
 
 
 [1]: http://www.mediawiki.org/wiki/Extension:Commentbox "Documentacion de la extension CommentBox"
