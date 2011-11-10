@@ -1,4 +1,11 @@
 <?php
+/**
+ * 
+ * Pagina especial que permite que un usuario miembro del grupo "commentadmin" administre
+ * (apruebe o elimine) los comentarios existentes.
+ * @author miguelerm
+ *
+ */
 class CommentsAdministration extends SpecialPage {
 	
 	/**

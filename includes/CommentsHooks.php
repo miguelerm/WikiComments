@@ -1,8 +1,8 @@
 <?php
 /**
  *
- * Clase que encapsula toda la lógica agregada a los eventos de renderizado de páginas de MediaWiki
- * @author miguel.erm
+ * Clase que encapsula toda la lógica agregada a los eventos de MediaWiki
+ * @author miguelerm
  *
  */
 class CommentsHooks{
