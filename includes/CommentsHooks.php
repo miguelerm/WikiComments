@@ -16,14 +16,21 @@ class CommentsHooks{
 	 * @param string $text el texto HTML que será agregado.
 	 */
 	public static function OutputPageBeforeHTML( &$op, &$text ){
-
+		
+		global $wgScriptPath;
+		
 		$articleTitle = $op->getTitle();
 		
-		if (!$articleTitle->exists()) return true;
+		if ( !$articleTitle->exists() ) return true;
 		
-		if(!self::showWikiComments()) return true;
+		if( !self::showWikiComments() ) return true;
 		
-		$text .= self::renderForm($articleTitle->getArticleID());
+		
+		$op->addStyle( $wgScriptPath . '/extensions/WikiComments/main.css' );
+		$op->addScriptFile( $wgScriptPath . '/extensions/jQuery/jquery-1.7.min.js' );
+		$op->addScriptFile( $wgScriptPath . '/extensions/WikiComments/WikiComments.js' );
+		
+		$text .= self::renderForm( $articleTitle->getArticleID() );
 		$text .= self::renderList();
 
 		return true;
@@ -93,7 +100,7 @@ class CommentsHooks{
 		$content .=             '<li style="display:none" id="reply">';
 		$content .=                '<label for="replytext">En respuesta de:</label>';
 		$content .=                '<textarea rows="5" cols="20" name="replytext" id="replytext" disabled="disabled"></textarea>';;
-		$content .=                '<a href="#" title="Cancelar" onclick="return cancelarRespuesta()">Cancelar</a>';;
+		$content .=                '<a href="#" title="Cancelar" onclick="cancelarRespuesta(); return false;">Cancelar</a>';;
 		$content .=             '</li>';
 		$content .=             '<li>';
 		$content .=                '<input type="hidden" name="articleId" value="' . $articleId  . '" />';
@@ -107,16 +114,6 @@ class CommentsHooks{
 		$content .=    '</form>';
 		$content .= '</div>';
 
-		$content .= '<script type="text/javascript">';
-		$content .= 'function cancelarRespuesta(){';
-		$content .=    '$(\'.formularioComentarios\').children().find(\'[name=parentId]\').val(0);';
-		$content .=    '$(\'#reply\').hide();';
-		$content .=    '$(\'#replytext\').val("");';
-		$content .=    '$(\'#text\').focus();';
-		$content .=    'return false;';
-		$content .= '}';
-		$content .= '</script>';
-			
 		return $content;
 
 	}
@@ -128,14 +125,11 @@ class CommentsHooks{
 	 */
 	private static function renderList(){
 
-		global $wgTitle, $wgScriptPath, $wgOut;
-
-		$wgOut->addScript("<script type=\"text/javascript\" src=\"" . $wgScriptPath . "/extensions/jQuery/jquery-1.7.min.js\"></script>\n");
+		global $wgTitle, $wgScriptPath;
 
 		$comments = Comment::getApproved($wgTitle->getArticleID());
 
 		$content  = '';
-		$content .= '<link rel="stylesheet" type="text/css" href="'.$wgScriptPath.'/extensions/WikiComments/main.css" media="screen" />';
 		$content .= '<div class="listaComentarios">';
 
 		if(count($comments) > 0){
@@ -153,21 +147,10 @@ class CommentsHooks{
 
 		$content .= '</div>';
 
-
-		$content .= '<script type="text/javascript">';
-		$content .= 'function responder(id){';
-		$content .=    '$(\'.formularioComentarios\').children().find(\'[name=parentId]\').val(id);';
-		$content .=    '$(\'#reply\').show();';
-		$content .=    '$(\'#replytext\').val($(\'#comment\' + id + \'text\').text());';
-		$content .=    '$(\'#text\').focus();';
-		$content .=    'return false;';
-		$content .= '}';
-		$content .= '</script>';
-
 		return $content;
 
 	}
-
+	
 	/**
 		*
 		* Obtiene el html necesario para mostrar un comentario y sus respuestas.
@@ -185,7 +168,7 @@ class CommentsHooks{
 
 		if ($wgUser->isLoggedIn()){
 			$content .=    '<div class="acciones">';
-			$content .=       '<a href="#" onclick="return responder(' . $comment->getId() . ')" title="Responder">Responder</a>';
+			$content .=       '<a href="#" onclick="responder(' . $comment->getId() . '); return false;" title="Responder">Responder</a>';
 			$content .=    '</div>';
 		}
 			
@@ -204,6 +187,5 @@ class CommentsHooks{
 
 		return $content;
 	}
-
-
+	
 }
