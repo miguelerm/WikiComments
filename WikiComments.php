@@ -1,11 +1,8 @@
 <?php
 /*
  * WikiComments - Extension que permite que un usuario autenticado, coloque un 
- * comentario en algun artículo utilizando la función la funcion {{#commentsform:}}.
+ * comentario en algun artículo wiki.
  * 
- * y permite visualizar la lista de comentarios si el artículo tiene la funcion
- * {{#commentslist:}}
- *  
  * Para instalar esta extension, agregue en el archivo LocalSettings.php
  * la línea: require_once('$IP/extensions/WikiComments/WikiComments.php')
  * 
@@ -21,14 +18,14 @@ if(!defined('MEDIAWIKI')) {
 	die(-1);
 }
 
-$wgExtensionCredits['parserhook'][] = array(
+$wgExtensionCredits['other'][] = array(
 	'path'           => __FILE__,
 	'name'           => 'WikiComments',
 	'author'         => 'Miguel Roman <miguelerm@gmail.com>',
-	'url'            => 'https://github.com/miguelerm',
-	'version'        => '0.1',
+	'url'            => 'https://github.com/miguelerm/wikicomments',
+	'version'        => '0.2',
 	'descriptionmsg' => 'comentarios-desc',
-	'description'    => 'Just Another Comments Module for MediaWiki'
+	'description'    => 'Just Another Comments Extension for MediaWiki'
 );
 
 require_once 'WikiComments.body.php';
