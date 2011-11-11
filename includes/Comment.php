@@ -160,6 +160,8 @@ class Comment{
 		global $wgDBprefix;
 		global $wgShowSQLErrors;
 		
+		CommentsDB::CheckDatabase();
+		
 		//Se seleccionan las tablas WikiComments, user, page, para su posterior interseccion.
 		$tables = array( "${wgDBprefix}WikiComments", "${wgDBprefix}user", "${wgDBprefix}page"  );
 		
@@ -226,6 +228,8 @@ class Comment{
 		
 		global $wgDBprefix;
 		
+		CommentsDB::CheckDatabase();
+		
 		$database = wfGetDB( DB_MASTER );
 		
 		$database->insert(
@@ -254,7 +258,10 @@ class Comment{
 	 * Elimina la información del comentario de la base de datos.
 	 */
 	public function delete(){
+		
 		global $wgDBprefix;
+		
+		CommentsDB::CheckDatabase();
 		
 		$database = wfGetDB( DB_MASTER );
 		$database->delete("${wgDBprefix}WikiComments", array('id' => $this->id), __METHOD__ );
@@ -267,8 +274,10 @@ class Comment{
 	 * Marca el comentario como aprobado (cambiando su estado de 0 a 1).
 	 */
 	public function approve(){
+		
 		global $wgDBprefix;
 		
+		CommentsDB::CheckDatabase();
 		$database = wfGetDB( DB_MASTER );
 		$database->update("${wgDBprefix}WikiComments", array('status' => 1), array('id' => $this->id), __METHOD__ );
 		$database->commit();
